@@ -8,3 +8,6 @@ class Producto(models.Model):
     stock = models.IntegerField(default=0)
     precio = models.FloatField(default=0)
     
+    def __str__(self):
+        return self.nombre
+    
