@@ -1,0 +1,7 @@
+usuario: administrador
+correo: admin@gmail.com
+contraseña: admin12345
+
+usuario: admin
+correo: admin@example.com
+contraseña: 12345678

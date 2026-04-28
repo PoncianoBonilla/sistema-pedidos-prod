@@ -1,9 +1,11 @@
+# project/urls.py
 from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('clientes/', include('cliente.urls')),   # API de clientes
-    path('pedidos/', include('pedido.urls')),     # API de pedidos
-    path('productos/', include('producto.urls')), # API de productos
+    path('api/', include('users.urls')),
+    path('api/clientes/', include('cliente.urls')),
+    path('api/productos/', include('producto.urls')),
+    path('api/pedidos/', include('pedido.urls')),
 ]

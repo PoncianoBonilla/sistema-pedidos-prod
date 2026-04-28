@@ -1,0 +1,18 @@
+# railway.toml
+
+[build]
+  # Construir el frontend de React
+  buildCommand = "cd frontend && npm install && npm run build && cd .."
+  # Comando para recoger los archivos estáticos de Django
+  postBuildCommand = "python manage.py collectstatic --noinput"
+
+[deploy]
+  # Comando para iniciar el servidor Django
+  startCommand = "gunicorn sistema.wsgi"
+  healthcheckPath = "/api/health/"
+  restartPolicyType = "ON_FAILURE"
+
+[service]
+  # Tu aplicación correrá en el puerto que Railway asigna automáticamente
+  [service.ports]
+    port = "8000"

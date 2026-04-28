@@ -33,7 +33,15 @@ psycopg[binary]==3.2.10
    cd sistema-pedidos
    ```
 
-2. Crear un entorno virtual:
+2. Configurar variables de entorno:
+   Crea un archivo `.env` en la raíz con el siguiente contenido:
+   ```env
+   DB_NAME=pedido
+   DB_PASSWORD=tu_contraseña
+   SECRET_KEY=tu_secret_key_de_django
+   ```
+
+3. Crear un entorno virtual:
 
    ```bash
    python -m venv venv
