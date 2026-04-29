@@ -1,0 +1,14 @@
+{
+  "build": {
+    "builder": "NIXPACKS",
+    "nixpacksConfig": {
+      "providers": ["python"],
+      "pythonVersion": "3.11"
+    }
+  },
+  "deploy": {
+    "startCommand": "gunicorn sistema.wsgi:application --bind 0.0.0.0:$PORT",
+    "healthcheckPath": "/api/token/",
+    "restartPolicyType": "ON_FAILURE"
+  }
+}
