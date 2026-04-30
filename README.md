@@ -1,6 +1,6 @@
 # 🛒 Sistema de Pedidos con Django
 
-Este proyecto es un **Sistema de Pedidos** desarrollado en **Python 3.12.1** usando **Django 5.2.7** y PostgreSQL.
+Este proyecto es un **Sistema de Pedidos** desarrollado en **Python 3.12.1** usando **Django 5.0.x** y PostgreSQL.
 Incluye 3 aplicaciones principales:
 
 * **cliente** → gestión de clientes

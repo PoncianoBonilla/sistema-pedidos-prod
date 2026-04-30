@@ -1,7 +1,7 @@
 ﻿providers = ["python", "node"]
 
 [phases.install]
-cmds = ["pip install --upgrade pip && pip install -r requirements.txt", "npm --prefix sistema-pedidos-ui install"]
+cmds = ["python -m pip install --upgrade pip && python -m pip install -r requirements.txt", "npm --prefix sistema-pedidos-ui install"]
 
 [phases.build]
 cmds = ["npm --prefix sistema-pedidos-ui run build", "python manage.py collectstatic --noinput"]
