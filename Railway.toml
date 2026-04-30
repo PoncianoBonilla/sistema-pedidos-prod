@@ -8,5 +8,5 @@
 
 [deploy]
   # Comando para iniciar el servidor Django
-  startCommand = "gunicorn sistema.wsgi:application --bind 0.0.0.0:$PORT"
+  startCommand = "python manage.py migrate && gunicorn sistema.wsgi:application --bind 0.0.0.0:$PORT"
   restartPolicyType = "ON_FAILURE"

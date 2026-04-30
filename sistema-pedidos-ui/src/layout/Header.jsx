@@ -23,6 +23,7 @@ import { useNavigate } from "react-router-dom";
 
 const Header = ({ onToggleSidebar, onCollapseSidebar, collapsed }) => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [anchorEl, setAnchorEl] = useState(null);
@@ -33,7 +34,7 @@ const Header = ({ onToggleSidebar, onCollapseSidebar, collapsed }) => {
   const handleLogout = () => {
     handleMenuClose();
     logout();
-    window.location.href = "/login";
+    navigate("/login");
   };
 
   // Iniciales para avatar: preferir First + Last, si no username
@@ -45,8 +46,6 @@ const Header = ({ onToggleSidebar, onCollapseSidebar, collapsed }) => {
     }
     return (user?.username?.charAt(0) || "U").toUpperCase();
   };
-
-  const navigate = useNavigate();
 
   return (
     <AppBar
@@ -73,7 +72,7 @@ const Header = ({ onToggleSidebar, onCollapseSidebar, collapsed }) => {
               display: { xs: "none", sm: "block" }, // oculto en móviles si querés
               objectFit: "contain",
             }}
-            onClick={() => (window.location.href = "/dashboard")}
+            onClick={() => navigate("/dashboard")}
           />
 
           {/* Botón hamburguesa: en móvil abre drawer; en desktop colapsa */}

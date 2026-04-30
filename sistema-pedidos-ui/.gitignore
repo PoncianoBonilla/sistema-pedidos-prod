@@ -1,24 +1,51 @@
-# Logs
-logs
+# Python / Django
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.pytest_cache/
+.coverage
+
+# Django específico
 *.log
+db.sqlite3
+db.sqlite3-journal
+staticfiles/
+media/
+local_settings.py
+
+# Archivos sensibles
+.env
+.env.local
+.env.production
+datos.txt
+
+# Node / React / Vite
+node_modules/
+dist/
+dist-ssr/
+*.local
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+Thumbs.db
+
+# Railway
+.railway/
+
+# Respaldos
+*.bak
+*.backup

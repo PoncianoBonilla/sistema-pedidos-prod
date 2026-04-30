@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+ALLOWED_HOSTS = ['*'] # Para debug en Railway, luego puedes restringirlo
 
 
 # Application definition
@@ -63,8 +63,10 @@ REST_FRAMEWORK = {
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    os.getenv('CORS_ALLOWED_ORIGIN_PROD', 'http://localhost:5173'),
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True # Recomendado para la fase inicial de despliegue
+CSRF_TRUSTED_ORIGINS = [os.getenv('RAILWAY_PUBLIC_DOMAIN', 'https://*.railway.app')]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -104,7 +106,7 @@ WSGI_APPLICATION = 'sistema.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=f"postgres://{os.getenv('DB_USER', 'postgres')}:{os.getenv('DB_PASSWORD')}@127.0.0.1:5432/{os.getenv('DB_NAME')}",
+        default=os.getenv('DATABASE_URL', f"postgres://{os.getenv('DB_USER', 'postgres')}:{os.getenv('DB_PASSWORD')}@127.0.0.1:5432/{os.getenv('DB_NAME')}"),
         conn_max_age=600
     )
 }
@@ -134,7 +136,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'es-es'
 
-TIME_ZONE = 'America/Argentina/Buenos_Aires'
+TIME_ZONE = 'America/Bolivia/La_Paz'
 
 USE_I18N = True
 
@@ -147,6 +149,11 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Carpeta donde React deja los archivos compilados
+STATICFILES_DIRS = [
+    BASE_DIR / "sistema-pedidos-ui" / "dist",
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

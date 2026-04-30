@@ -1,9 +1,10 @@
-﻿@"
-providers = ["python"]
+﻿providers = ["python", "node"]
 
 [phases.install]
-cmds = ["pip install -r requirements.txt"]
+cmds = ["pip install -r requirements.txt", "npm --prefix sistema-pedidos-ui install"]
+
+[phases.build]
+cmds = ["npm --prefix sistema-pedidos-ui run build", "python manage.py collectstatic --noinput"]
 
 [start]
-cmd = "gunicorn sistema.wsgi:application --bind 0.0.0.0:\$PORT"
-"@ | Out-File -FilePath nixpacks.toml -Encoding UTF8
+cmd = "python manage.py migrate && gunicorn sistema.wsgi:application --bind 0.0.0.0:$PORT"

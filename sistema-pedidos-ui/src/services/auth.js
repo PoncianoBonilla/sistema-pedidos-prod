@@ -28,7 +28,7 @@ export const loginUser = async (username, password) => {
     } else if (error.response?.status === 404) {
       errorMessage = "Endpoint no encontrado. Verifica que Django esté corriendo";
     } else if (error.code === "ERR_NETWORK") {
-      errorMessage = "Error de conexión. ¿Django está corriendo en http://127.0.0.1:8000?";
+      errorMessage = "Error de conexión con el servidor. Por favor, intente más tarde.";
     } else {
       errorMessage = error.response?.data?.detail || error.message || "Error desconocido";
     }
