@@ -1,14 +1,21 @@
 [providers]
-python = "3.11"
+python = "3.12"
+node = "20"
 
 [phases.setup]
-nixPkgs = ["python311"]
+nixPkgs = ["python312", "nodejs_20", "python312Packages.pip"]
 
 [phases.install]
-cmds = ["pip install -r requirements.txt"]
+cmds = [
+    "pip install --upgrade pip",
+    "pip install -r requirements.txt"
+]
 
 [phases.build]
-cmds = ["python manage.py collectstatic --noinput || true"]
+cmds = [
+    "cd sistema-pedidos-ui && npm install && npm run build && cd ..",
+    "python manage.py collectstatic --noinput || true"
+]
 
 [start]
 cmd = "gunicorn sistema.wsgi:application --bind 0.0.0.0:$PORT"

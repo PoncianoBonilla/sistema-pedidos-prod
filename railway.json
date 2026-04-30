@@ -3,12 +3,23 @@
     "builder": "NIXPACKS",
     "nixpacksConfig": {
       "providers": ["python"],
-      "pythonVersion": "3.11"
+      "pythonVersion": "3.11",
+      "phases": {
+        "setup": {
+          "nixPkgs": ["python311", "python311Packages.pip"]
+        },
+        "install": {
+          "cmds": ["pip install --upgrade pip", "pip install -r requirements.txt"]
+        },
+        "build": {
+          "cmds": ["python manage.py collectstatic --noinput || true"]
+        }
+      }
     }
   },
   "deploy": {
     "startCommand": "gunicorn sistema.wsgi:application --bind 0.0.0.0:$PORT",
-    "healthcheckPath": "/api/token/",
-    "restartPolicyType": "ON_FAILURE"
+    "restartPolicyType": "ON_FAILURE",
+    "healthcheckPath": "/"
   }
 }
