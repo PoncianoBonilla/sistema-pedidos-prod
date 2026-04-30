@@ -1,7 +1,9 @@
-﻿providers = ["python"]
+﻿@"
+providers = ["python"]
 
 [phases.install]
 cmds = ["pip install -r requirements.txt"]
 
 [start]
-cmd = "gunicorn sistema.wsgi:application --bind 0.0.0.0:\"
+cmd = "gunicorn sistema.wsgi:application --bind 0.0.0.0:\$PORT"
+"@ | Out-File -FilePath nixpacks.toml -Encoding UTF8
