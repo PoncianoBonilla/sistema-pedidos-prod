@@ -1,5 +1,3 @@
-# project/urls.py
-
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.shortcuts import render
@@ -14,5 +12,6 @@ urlpatterns = [
     path('api/productos/', include('producto.urls')),
     path('api/pedidos/', include('pedido.urls')),
 
-    re_path(r'^.*$', index),  # 👈 React SPA
+    # 👇 IMPORTANTE: excluir static
+    re_path(r'^(?!static/).*$', index),
 ]
