@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = ['.railway.app']
 
 
 # Application definition
@@ -66,7 +66,11 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True # Recomendado para la fase inicial de despliegue
-CSRF_TRUSTED_ORIGINS = [os.getenv('RAILWAY_PUBLIC_DOMAIN', 'https://*.railway.app')]
+CSRF_TRUSTED_ORIGINS = [
+    f"https://{os.getenv('RAILWAY_PUBLIC_DOMAIN')}"
+] if os.getenv('RAILWAY_PUBLIC_DOMAIN') else [] # Permitir el dominio público de Railway definido en las variables de entorno
+
+CSRF_TRUSTED_ORIGINS = ["https://*.railway.app"] # Permitir cualquier subdominio de railway.app
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -85,7 +89,7 @@ ROOT_URLCONF = 'sistema.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],  # 👈 IMPORTANTE
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
