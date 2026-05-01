@@ -105,8 +105,8 @@ WSGI_APPLICATION = 'sistema.wsgi.application'
 # DATABASE
 # ======================
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL', 'sqlite:///db.sqlite3'),
+    'default': dj_database_url.parse(
+        os.environ.get('DATABASE_URL'),
         conn_max_age=600
     )
 }
