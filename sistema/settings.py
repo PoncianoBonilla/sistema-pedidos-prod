@@ -75,6 +75,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -96,7 +97,7 @@ ROOT_URLCONF = 'sistema.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],  # ❌ No frontend aquí
+        'DIRS': [BASE_DIR / 'staticfiles'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -141,10 +142,12 @@ USE_I18N = True
 USE_TZ = True
 
 # ======================
-# STATIC FILES (API ONLY)
+# STATIC FILES
 # ======================
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ======================
 # DEFAULT AUTO FIELD
