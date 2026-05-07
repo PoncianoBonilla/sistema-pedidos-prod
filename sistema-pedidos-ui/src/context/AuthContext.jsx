@@ -6,32 +6,50 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Recuperar usuario al cargar la app
+  // 🔥 Inicializar autenticación
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      api
-        .get("me/")  // el interceptor agrega el token automáticamente
-        .then((res) => setUser(res.data))
-        .catch(() => logout());
-    }
+    const initAuth = async () => {
+      const token = localStorage.getItem("access_token");
+
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await api.get("me/");
+        setUser(res.data);
+      } catch (error) {
+        console.log("❌ Token inválido o expirado");
+        logoutUser();
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initAuth();
   }, []);
 
+  // 🔐 login (solo guarda usuario)
   const login = (userData) => {
     setUser(userData);
   };
 
+  // 🚪 logout limpio
   const logout = () => {
     setUser(null);
     logoutUser();
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
+// hook
 export const useAuth = () => useContext(AuthContext);

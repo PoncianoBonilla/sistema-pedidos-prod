@@ -1,4 +1,3 @@
-// services/api.js
 import axios from "axios";
 
 const api = axios.create({
@@ -6,33 +5,65 @@ const api = axios.create({
   timeout: 10000,
 });
 
-// Log de cada petición
+// ======================
+// REQUEST
+// ======================
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("access_token");
-  console.log(`📤 [${config.method?.toUpperCase()}] ${config.url}`);
-  console.log("   Headers:", config.headers);
-  console.log("   Data:", config.data);
+
+  config.headers = config.headers || {};
+  config.headers["Content-Type"] = "application/json";
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
-    console.log("   Token añadido:", token.substring(0, 50) + "...");
-  } else {
-    console.log("   Sin token");
   }
+
   return config;
 });
 
-// Log de cada respuesta
+// ======================
+// RESPONSE (CON REFRESH)
+// ======================
 api.interceptors.response.use(
-  (response) => {
-    console.log(`📥 [${response.config.method?.toUpperCase()}] ${response.config.url} - Status: ${response.status}`);
-    console.log("   Data:", response.data);
-    return response;
-  },
-  (error) => {
-    console.error(`❌ Error en ${error.config?.method?.toUpperCase()} ${error.config?.url}`);
-    console.error("   Status:", error.response?.status);
-    console.error("   Data:", error.response?.data);
-    console.error("   Message:", error.message);
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Si el token expiró
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        const refresh = localStorage.getItem("refresh_token");
+
+        if (!refresh) throw new Error("No refresh token");
+
+        console.log("🔄 Intentando refrescar token...");
+
+        const res = await axios.post(
+          `${import.meta.env.VITE_API_URL}/token/refresh/`,
+          { refresh }
+        );
+
+        const newAccess = res.data.access;
+
+        localStorage.setItem("access_token", newAccess);
+
+        // actualizar header y reintentar request
+        originalRequest.headers.Authorization = `Bearer ${newAccess}`;
+
+        return api(originalRequest);
+
+      } catch (refreshError) {
+        console.log("❌ Refresh falló, cerrando sesión");
+
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+
+        window.location.href = "/login";
+      }
+    }
+
     return Promise.reject(error);
   }
 );

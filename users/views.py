@@ -1,47 +1,60 @@
+# users/views.py
+
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from .models import UserProfile
 from .serializers import UserSerializer
+from .permissions import HasModulePermissionViewSet
+
 
 class UserViewSet(viewsets.ModelViewSet):
     """
-    CRUD completo de usuarios con control de roles.
-    - Solo Admin puede listar, crear, actualizar o eliminar usuarios.
-    - No se pueden eliminar usuarios con rol 'Admin'.
-    - Cambio de contraseña sin requerir la actual.
+    CRUD de usuarios con permisos dinámicos por módulo
     """
+
     queryset = User.objects.all().select_related('profile')
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, HasModulePermissionViewSet]
 
-    def get_permissions(self):
-        if self.action in ['list', 'create', 'update', 'partial_update', 'destroy']:
-            return [permissions.IsAdminUser()]
-        return [permissions.IsAuthenticated()]
+    # 🔥 módulo que se valida
+    module = "usuarios"
 
     def get_queryset(self):
         user = self.request.user
-        if hasattr(user, 'profile') and user.profile.role != 'Admin':
+
+        # 🔐 si no es admin → solo se ve a sí mismo
+        if (
+            hasattr(user, 'profile') and
+            user.profile.role != UserProfile.ROLE_ADMIN
+        ):
             return User.objects.filter(id=user.id)
+
         return super().get_queryset()
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        if hasattr(instance, 'profile') and instance.profile.role == 'Admin':
+
+        # 🔒 proteger Admin
+        if (
+            hasattr(instance, 'profile') and
+            instance.profile.role == UserProfile.ROLE_ADMIN
+        ):
             return Response(
                 {"detail": "No se puede eliminar un usuario con rol Admin."},
                 status=status.HTTP_403_FORBIDDEN
             )
+
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=['post'])
     def change_password(self, request):
         """
-        Cambiar contraseña del usuario actual sin pedir la actual.
+        Cambiar contraseña del usuario actual
         """
+
         user = request.user
         new_password = request.data.get("new_password")
 
@@ -59,12 +72,27 @@ class UserViewSet(viewsets.ModelViewSet):
 
         user.set_password(new_password)
         user.save()
-        return Response({"detail": "Contraseña actualizada correctamente."}, status=status.HTTP_200_OK)
 
+        return Response(
+            {"detail": "Contraseña actualizada correctamente."},
+            status=status.HTTP_200_OK
+        )
+
+
+# ======================
+# /me/
+# ======================
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def me_view(request):
-    """ Devuelve los datos del usuario autenticado """
-    serializer = UserSerializer(request.user)
-    return Response(serializer.data)
+    user = request.user
+    profile = user.profile
+
+    return Response({
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "role": profile.role,
+        "status": profile.status,
+    })

@@ -3,19 +3,24 @@ from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
 
+# ======================
+# BASE
+# ======================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Cargar variables de entorno
+# ======================
+# ENV
+# ======================
 load_dotenv(BASE_DIR / '.env')
 
-# ======================
-# SEGURIDAD
-# ======================
 SECRET_KEY = os.getenv('SECRET_KEY', 'temp-key')
 
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['.railway.app']
+ALLOWED_HOSTS = os.getenv(
+    "ALLOWED_HOSTS",
+    "127.0.0.1,localhost"
+).split(",")
 
 # ======================
 # APPS
@@ -25,6 +30,7 @@ INSTALLED_APPS = [
     'pedido',
     'producto',
     'users',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -38,7 +44,7 @@ INSTALLED_APPS = [
 ]
 
 # ======================
-# REST
+# REST FRAMEWORK
 # ======================
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -50,12 +56,16 @@ REST_FRAMEWORK = {
 }
 
 # ======================
-# CORS / CSRF
+# CORS (FRONTEND SEPARADO)
 # ======================
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = os.getenv(
+    "CORS_ALLOWED_ORIGINS",
+    "http://localhost:5173"
+).split(",")
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://*.railway.app"
+    "https://sistema-pedidos.up.railway.app",
+    "http://localhost:5173",
 ]
 
 # ======================
@@ -63,8 +73,8 @@ CSRF_TRUSTED_ORIGINS = [
 # ======================
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -86,7 +96,7 @@ ROOT_URLCONF = 'sistema.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # ✔ necesario para React
+        'DIRS': [],  # ❌ No frontend aquí
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -111,8 +121,9 @@ DATABASES = {
         DATABASE_URL if DATABASE_URL else "sqlite:///db.sqlite3"
     )
 }
+
 # ======================
-# PASSWORDS
+# PASSWORD VALIDATION
 # ======================
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -130,22 +141,12 @@ USE_I18N = True
 USE_TZ = True
 
 # ======================
-# STATIC FILES (CLAVE 🔥)
+# STATIC FILES (API ONLY)
 # ======================
 STATIC_URL = '/static/'
-
-# donde collectstatic copia todo
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# donde está React build
-STATICFILES_DIRS = [
-    BASE_DIR / "sistema-pedidos-ui" / "dist",
-]
-
-# whitenoise (estable)
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
-
 # ======================
-# DEFAULT ID
+# DEFAULT AUTO FIELD
 # ======================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
