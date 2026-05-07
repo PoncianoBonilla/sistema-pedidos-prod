@@ -60,12 +60,13 @@ REST_FRAMEWORK = {
 # ======================
 CORS_ALLOWED_ORIGINS = os.getenv(
     "CORS_ALLOWED_ORIGINS",
-    "http://localhost:5173"
+    "http://localhost:5173,https://sistema-pedidos.vercel.app"
 ).split(",")
 
 CSRF_TRUSTED_ORIGINS = [
     "https://sistema-pedidos.up.railway.app",
     "http://localhost:5173",
+    "https://sistema-pedidos.vercel.app",
 ]
 
 # ======================
