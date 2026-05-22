@@ -116,7 +116,7 @@ WSGI_APPLICATION = 'sistema.wsgi.application'
 # ======================
 # DATABASE
 # ======================
-DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///db.sqlite3")
+DATABASE_URL = os.environ.get("DATABASE_URL") or "sqlite:///db.sqlite3"
 
 DATABASES = {
     "default": dj_database_url.parse(
