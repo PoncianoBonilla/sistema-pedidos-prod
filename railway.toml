@@ -1,8 +1,9 @@
 [build]
 builder = "nixpacks"
-buildCommand = "pip install -r requirements.txt && mkdir -p staticfiles/assets && cp -r sistema-pedidos-ui/dist/* staticfiles/ 2>/dev/null || true && python manage.py collectstatic --noinput"
+buildCommand = "pip install -r requirements.txt && mkdir -p staticfiles/assets && cp -r sistema-pedidos-ui/dist/* staticfiles/ 2>/dev/null || true"
 
 [deploy]
 startCommand = "gunicorn sistema.wsgi:application --bind 0.0.0.0:$PORT"
+preDeployCommand = "python manage.py collectstatic --noinput"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
