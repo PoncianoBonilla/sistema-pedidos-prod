@@ -118,9 +118,17 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 
 DATABASES = {
     "default": dj_database_url.parse(
-        DATABASE_URL if DATABASE_URL else "sqlite:///db.sqlite3"
+        DATABASE_URL if DATABASE_URL else "sqlite:///db.sqlite3",
+        conn_max_age=600,
+        conn_health_checks=True,
     )
 }
+
+# Configure SSL for PostgreSQL on Railway
+if DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql":
+    DATABASES["default"]["OPTIONS"] = {
+        "sslmode": "require",
+    }
 
 # ======================
 # PASSWORD VALIDATION
