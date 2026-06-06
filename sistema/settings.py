@@ -13,7 +13,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ======================
 load_dotenv(BASE_DIR / '.env')
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'temp-key')
+SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY and not os.getenv('DEBUG', 'False') == 'True':
+    from django.core.exceptions import ImproperlyConfigured
+    raise ImproperlyConfigured("La variable de entorno SECRET_KEY debe estar definida en producción.")
 
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
@@ -163,9 +166,20 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Configuración WhiteNoise solo en producción
-if not DEBUG:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Configuración de Almacenamiento (Django 5.0+)
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage" 
+        if not os.getenv('DEBUG', 'False') == 'True' 
+        else "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+# Optimización de caché para WhiteNoise (1 año)
+WHITENOISE_MAX_AGE = 31536000 if not DEBUG else 0
 
 # ======================
 # MEDIA FILES (opcional - para archivos subidos)
@@ -217,4 +231,10 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = 'same-origin'
     X_FRAME_OPTIONS = 'DENY'
+
+    # HTTP Strict Transport Security (HSTS)
+    SECURE_HSTS_SECONDS = 31536000  # 1 año
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
