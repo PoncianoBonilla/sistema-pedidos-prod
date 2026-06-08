@@ -125,7 +125,11 @@ TEMPLATES = [
             ],
         },
     },
-}
+]
+
+# ======================
+# WSGI
+# ======================
 
 WSGI_APPLICATION = 'sistema.wsgi.application'
 
