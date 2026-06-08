@@ -13,22 +13,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ======================
 load_dotenv(BASE_DIR / '.env')
 
+# Definir DEBUG primero para reutilizar el booleano limpiamente
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+
 SECRET_KEY = os.getenv('SECRET_KEY')
-if not SECRET_KEY and not os.getenv('DEBUG', 'False') == 'True':
+if not SECRET_KEY and not DEBUG:
     from django.core.exceptions import ImproperlyConfigured
     raise ImproperlyConfigured("La variable de entorno SECRET_KEY debe estar definida en producción.")
 
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+# Identificar entorno Render
+IS_RENDER = os.getenv('RENDER', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv(
-    "ALLOWED_HOSTS",
-    "127.0.0.1,localhost"
-).split(",")
+# ======================
+# ALLOWED HOSTS & RENDERING CONFIG
+# ======================
+# Permitir localhost por defecto
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
-# Identificar entorno Railway
-IS_RAILWAY = os.getenv('RAILWAY_ENVIRONMENT', 'False') == 'True'
+# Inyectar automáticamente el subdominio que te asigne Render
+if os.getenv('RENDER_EXTERNAL_HOSTNAME'):
+    ALLOWED_HOSTS.append(os.getenv('RENDER_EXTERNAL_HOSTNAME'))
 
-# DATABASE_URL debe leerse después de load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 # ======================
@@ -65,7 +70,7 @@ REST_FRAMEWORK = {
 }
 
 # ======================
-# CORS (FRONTEND SEPARADO)
+# CORS & CSRF
 # ======================
 CORS_ALLOWED_ORIGINS = os.getenv(
     "CORS_ALLOWED_ORIGINS",
@@ -76,8 +81,12 @@ CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = os.getenv(
     "CSRF_TRUSTED_ORIGINS",
-    "https://sistema-pedidos.up.railway.app,http://localhost:5173,https://sistema-pedidos.vercel.app"
+    "http://localhost:5173,https://sistema-pedidos.vercel.app"
 ).split(",")
+
+# Agregar la URL de Render a los orígenes de confianza para CSRF
+if os.getenv('RENDER_EXTERNAL_HOSTNAME'):
+    CSRF_TRUSTED_ORIGINS.append(f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}")
 
 # ======================
 # MIDDLEWARE
@@ -116,16 +125,15 @@ TEMPLATES = [
             ],
         },
     },
-]
+}
 
 WSGI_APPLICATION = 'sistema.wsgi.application'
 
 # ======================
 # DATABASE
 # ======================
-
 if DATABASE_URL:
-    # Usar PostgreSQL (Railway o local con .env)
+    # Usar PostgreSQL (Render o local con .env)
     DATABASES = {
         "default": dj_database_url.config(
             default=DATABASE_URL,
@@ -134,7 +142,7 @@ if DATABASE_URL:
         )
     }
 else:
-    # Fallback a SQLite para desarrollo rápido
+    # Fallback a SQLite para desarrollo rápido local
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -161,34 +169,34 @@ USE_I18N = True
 USE_TZ = True
 
 # ======================
-# STATIC FILES
+# STATIC FILES & WHITENOISE
 # ======================
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Configuración de Almacenamiento (Django 5.0+)
+# Corrección crítica de sintaxis para los Storages en Django 5.0+
+STATICFILES_BACKEND = "django.contrib.staticfiles.storage.StaticFilesStorage" if DEBUG else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage" 
-        if not os.getenv('DEBUG', 'False') == 'True' 
-        else "django.contrib.staticfiles.storage.StaticFilesStorage",
+        "BACKEND": STATICFILES_BACKEND,
     },
 }
 
-# Optimización de caché para WhiteNoise (1 año)
-WHITENOISE_MAX_AGE = 31536000 if not DEBUG else 0
+# Optimización de caché para WhiteNoise (1 año en producción, 0 en desarrollo)
+WHITENOISE_MAX_AGE = 0 if DEBUG else 31536000
 
 # ======================
-# MEDIA FILES (opcional - para archivos subidos)
+# MEDIA FILES (opcional)
 # ======================
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # ======================
-# LOGGING (para debugging en Railway)
+# LOGGING (Útil para ver errores en los logs de Render)
 # ======================
 LOGGING = {
     'version': 1,
@@ -225,7 +233,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # SEGURIDAD ADICIONAL PARA PRODUCCIÓN
 # ======================
 if not DEBUG:
-    # Configuración de seguridad para Railway
+    # Indispensable para evitar bucles infinitos de redirección SSL tras el proxy de Render
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
